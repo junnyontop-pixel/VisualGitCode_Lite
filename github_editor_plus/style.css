@@ -1,0 +1,131 @@
+/* VS Code 스타일 에디터 테마 */
+
+.github-editor-enhanced {
+  /* 배경색 - VS Code 다크 테마 */
+  background-color: #1e1e1e !important;
+  color: #d4d4d4 !important;
+  
+  /* 폰트 설정 */
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  
+  /* 간격 설정 */
+  padding: 16px !important;
+  border-radius: 4px !important;
+  
+  /* 그림자 효과 */
+  box-shadow: 0 0 0 1px #3e3e42 inset !important;
+  
+  /* 스크롤 스타일 */
+  scrollbar-width: thin;
+  scrollbar-color: #424242 #1e1e1e;
+}
+
+/* 스크롤바 스타일 (Webkit 브라우저) */
+.github-editor-enhanced::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.github-editor-enhanced::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.github-editor-enhanced::-webkit-scrollbar-thumb {
+  background: #424242;
+  border-radius: 5px;
+}
+
+.github-editor-enhanced::-webkit-scrollbar-thumb:hover {
+  background: #4e4e50;
+}
+
+/* 선택 영역 스타일 */
+.github-editor-enhanced::selection {
+  background-color: #264f78 !important;
+  color: #d4d4d4 !important;
+}
+
+/* 문법 강조 (기본 클래스들) */
+.github-editor-enhanced .cm-keyword {
+  color: #569cd6 !important;
+  font-weight: bold;
+}
+
+.github-editor-enhanced .cm-string {
+  color: #ce9178 !important;
+}
+
+.github-editor-enhanced .cm-number {
+  color: #b5cea8 !important;
+}
+
+.github-editor-enhanced .cm-comment {
+  color: #6a9955 !important;
+  font-style: italic;
+}
+
+.github-editor-enhanced .cm-function {
+  color: #dcdcaa !important;
+}
+
+/* 호버 효과 */
+.github-editor-enhanced:hover {
+  box-shadow: 0 0 0 1px #464647 inset !important;
+}
+
+/* 포커스 효과 */
+.github-editor-enhanced:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px #0e639c inset !important;
+}
+
+/* 라인 넘버 스타일 (있을 경우) */
+.github-editor-enhanced .cm-linenumber {
+  color: #858585 !important;
+  background-color: #1e1e1e !important;
+  padding-right: 8px !important;
+}
+
+/* 자동완성 팝업 */
+.autocomplete-popup {
+  position: fixed !important;
+  background-color: #252526 !important;
+  border: 2px solid #0e639c !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.9) !important;
+  z-index: 2147483647 !important;
+  max-width: 300px !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+  font-size: 13px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  padding: 4px 0 !important;
+  margin: 0 !important;
+}
+
+/* 자동완성 항목 */
+.autocomplete-item {
+  padding: 8px 12px !important;
+  color: #cccccc !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+  display: block !important;
+}
+
+/* 선택된 자동완성 항목 */
+.autocomplete-item.selected {
+  background-color: #094771 !important;
+  color: #ffffff !important;
+  font-weight: bold !important;
+}
+
+/* 호버 효과 */
+.autocomplete-item:hover {
+  background-color: #3e3e42 !important;
+}
