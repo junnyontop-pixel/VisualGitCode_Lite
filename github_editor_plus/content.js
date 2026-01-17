@@ -3,9 +3,23 @@
     const VS_CODE_HOVER = '#2a2d2e';
     const VS_CODE_TEXT = '#cccccc';
 
-    const keywords = [
-        'async', 'await', 'class', 'const', 'constructor', 'debugger', 'default', 'delete', 'do', 'else', 'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'let', 'new', 'return', 'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'yield'
-    ].sort();
+    const SUGGEST_DATA = {
+        javascript: {
+            icon: '{}',
+            color: '#569cd6',
+            keywords: ['async', 'await', 'class', 'const', 'function', 'let', 'return', 'var', 'if', 'else'] // (생략)
+        },
+        html: {
+            icon: '<>',
+            color: '#e34c26',
+            keywords: ['!', 'div', 'span', 'p', 'a', 'h1', 'h2', 'img', 'button', 'input', 'script', 'style', 'body', 'head']
+        },
+        css: {
+            icon: '#',
+            color: '#569cd6',
+            keywords: ['color', 'background', 'margin', 'padding', 'display', 'flex', 'font-size', 'border', 'width', 'height']
+        }
+    };
 
     let state = {
         popup: null,
@@ -81,22 +95,7 @@
 
     // JS 전용 기능 모음
     function handleJSAssist(e) {
-        if (state.popup) {
-            if (e.key === 'ArrowDown') { e.preventDefault(); moveSelection(1); return; }
-            if (e.key === 'ArrowUp') { e.preventDefault(); moveSelection(-1); return; }
-            if (e.key === 'Enter' || e.key === 'Tab') {
-                if (state.currentMatches.length > 0) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    applyWord(state.currentMatches[state.selectedIndex]);
-                    return;
-                }
-            }
-            if (e.key === 'Escape') { closePopup(); return; }
-        }
-        
-        // 키 입력 후 즉시 트리거 (딜레이 최소화)
-        setTimeout(triggerSuggest, 0);
+        // 여기에 JS 전용 기능 추가 예정
     }
 
     // CSS 전용 기능 모음
@@ -186,27 +185,45 @@
     document.addEventListener('keydown', (e) => {
         const lang = getEditorLanguage();
 
-        // 1. 공통 기능 (괄호)
+        // 1. 팝업이 열려있을 때의 키보드 제어 (언어 상관없이 공통!)
+        if (state.popup) {
+            if (e.key === 'ArrowDown') { e.preventDefault(); moveSelection(1); return; }
+            if (e.key === 'ArrowUp') { e.preventDefault(); moveSelection(-1); return; }
+            if (e.key === 'Enter' || e.key === 'Tab') {
+                if (state.currentMatches.length > 0) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    applyWord(state.currentMatches[state.selectedIndex]);
+                    return;
+                }
+            }
+            if (e.key === 'Escape') { closePopup(); return; }
+        }
+
+        // 2. 공통 기능 (괄호 자동완성)
         const brackets = ['(', '[', '{', '"', "'"];
         if (brackets.includes(e.key)) {
             handleBrackets(e);
-            return; // 처리했으면 끝!
+            return;
         }
 
-        // 2. 언어별 분기 처리
+        // 3. 언어별 특화 기능
         if (lang === 'html') {
             handleHTMLAutoClose(e); 
-        } else if (lang === 'javascript') {
-            // JS일 때만 팝업 관련 키보드 제어 (위/아래 화살표 등) 실행
-            handleJSAssist(e);
         } else if (lang === 'css') {
-            handleCSSAssist(e)
+            handleCSSAssist(e);
+        } else if (lang === 'javascript') {
+            handleJSAssist(e);
         }
-    }, true); // true를 넣으면 이벤트 우선순위가 높아져!
+        
+        // 4. 모든 언어에서 글자를 치면 팝업 트리거 (JS 전용이 아님!)
+        setTimeout(triggerSuggest, 0);
+
+    }, true);
 
     function triggerSuggest() {
         const lang = getEditorLanguage();
-        if (lang !== 'javascript') { // JS가 아니면 팝업을 띄우지 마!
+        if (!SUGGEST_DATA[lang]) { // 지원하지 않는 언어면 팝업 닫기
             closePopup();
             return;
         }
@@ -220,7 +237,7 @@
         
         // 커서 직전의 텍스트 추출 (특수문자 제외 단어만)
         const textBefore = node.nodeType === 3 ? node.textContent.substring(0, offset) : "";
-        const match = textBefore.match(/([a-zA-Z0-9_]+)$/);
+        const match = textBefore.match(/([a-zA-Z0-9_!]+)$/);
         
         if (!match) {
             closePopup();
@@ -232,7 +249,7 @@
         state.startOffset = offset - inputWord.length;
 
         // [핵심 수정] 부분 일치하는 모든 키워드 검색
-        state.currentMatches = keywords.filter(k => 
+        state.currentMatches = SUGGEST_DATA[lang].keywords.filter(k => 
             k.toLowerCase().includes(inputWord)
         );
 
@@ -264,9 +281,19 @@
     }
 
     function renderList() {
+        // 1. 현재 어떤 언어인지 알아내기
+        const lang = getEditorLanguage(); 
+        
+        // 2. 그 언어에 해당하는 데이터(아이콘, 색상 등)를 info에 담기
+        const info = SUGGEST_DATA[lang]; 
+
+        // 만약 데이터가 없는 언어라면 안전하게 중단
+        if (!info) return;
+
+        // 3. 이제 info.color와 info.icon을 마음껏 사용!
         state.popup.innerHTML = state.currentMatches.map((m, i) => `
             <div class="vscode-item ${i === state.selectedIndex ? 'selected' : ''}" data-index="${i}">
-                <span class="vscode-icon">{}</span>
+                <span class="vscode-icon" style="color: ${info.color}">${info.icon}</span>
                 <span>${m}</span>
             </div>
         `).join('');
@@ -287,28 +314,83 @@
 
     function applyWord(word) {
         if (!word) return;
+
+        const lang = getEditorLanguage();
+        const info = SUGGEST_DATA[lang];
+        if (!info) return;
+
         const sel = window.getSelection();
         const range = sel.getRangeAt(0);
         const node = range.startContainer;
 
-        // 현재 커서 위치에서 뒤쪽으로 이어지는 단어 문자까지 포함해서 선택 범위 잡기
+        // 1. 기존에 입력 중이던 글자 지우기
         const textAfter = node.textContent.substring(state.startOffset);
         const fullWordMatch = textAfter.match(/^\w+/);
-        const lengthToDelete = fullWordMatch ? fullWordMatch[0].length : state.currentWord.length;
+        const lengthToDelete = state.currentWord.length;
 
         range.setStart(node, state.startOffset);
         range.setEnd(node, state.startOffset + lengthToDelete);
         range.deleteContents();
 
-        const textNode = document.createTextNode(word);
+        // 2. 최종 문자열(finalWord) 결정
+        let finalWord = word;
+        if (lang === 'html') {
+            if (word === '!') {
+                // 커서가 들어갈 위치에 딱 | 표시를 해둬
+                finalWord = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    |
+</body>
+</html>`;
+            } else {
+                finalWord = `<${word}></${word}>`;
+            }
+        }
+
+        // 3. 텍스트 노드 생성 및 에디터에 삽입
+        const textNode = document.createTextNode(finalWord);
         range.insertNode(textNode);
+
+        // 4. 커서 위치 잡기 (마법 로직)
+        const newRange = document.createRange();
         
-        range.setStartAfter(textNode);
-        range.setEndAfter(textNode);
+        if (lang === 'html' && word === '!') {
+            // | 기호의 위치를 찾아서 커서를 보낸 뒤 | 만 지우기
+            const pipeIndex = finalWord.indexOf('|');
+            
+            // 커서 범위를 | 글자 하나로 지정
+            newRange.setStart(textNode, pipeIndex);
+            newRange.setEnd(textNode, pipeIndex + 1);
+            
+            // 선택된 | 삭제
+            newRange.deleteContents();
+            
+            // 지워진 그 자리에 커서 고정
+            newRange.setStart(textNode, pipeIndex);
+            newRange.setEnd(textNode, pipeIndex);
+        } else if (lang === 'html') {
+            // 일반 태그: 태그 사이 (<p>|</p>)
+            const middleOffset = word.length + 2;
+            newRange.setStart(textNode, middleOffset);
+            newRange.setEnd(textNode, middleOffset);
+        } else {
+            // JS/CSS: 단어 바로 뒤
+            newRange.setStartAfter(textNode);
+            newRange.setEndAfter(textNode);
+        }
+
+        // 5. 변경된 커서 위치 적용
         sel.removeAllRanges();
-        sel.addRange(range);
+        sel.addRange(newRange);
 
         closePopup();
+        
+        // 에디터에 변화가 생겼음을 알림
         state.activeEditor.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
