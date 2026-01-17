@@ -16,6 +16,26 @@
 
 ---
 
+## 👨‍💻 사용 방법
+
+1. 콘솔창에
+
+``` js
+fetch('https://cdn.jsdelivr.net/gh/junnyontop-pixel/VisualGitCode_Lite@main/VisualGitCode_Lite.js')
+  .then(res => res.text())
+  .then(code => {
+    const script = document.createElement('script');
+    script.textContent = code;
+    document.head.appendChild(script);
+    console.log('VisualGitCode_Lite 로드 완료! ✨');
+  });
+```
+입력
+
+2. 이 레포지토리에서 다운로드 후 `chrome://extensions`로 이동, **개발자 모드를 켜고** `압축해제한 확장프로그램 로드`클릭 
+
+---
+
 ## ✨ 주요 기능 (Key Features)
 
 - **스마트 자동완성**: 키워드의 일부만 입력해도 대소문자 구분 없이 일치하는 모든 키워드를 추천합니다.
