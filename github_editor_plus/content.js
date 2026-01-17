@@ -37,12 +37,50 @@
         editor.dataset.vscEnhanced = "true";
         const contentEditable = editor.querySelector("[contenteditable='true']");
         
-        contentEditable.addEventListener("keydown", handleKeyDown, true);
+        // ✅ 이것만 남겨두면 돼
         contentEditable.addEventListener("mousedown", closePopup);
         state.activeEditor = contentEditable;
     }
 
-    function handleKeyDown(e) {
+    // html 전용 기능
+    function handleHTMLAutoClose(e) {
+        if (e.key === "Enter") { // 1. Enter는 첫 글자가 대문자여야 안전해!
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            
+            const textBefore = range.startContainer.textContent.slice(0, range.startOffset);
+            const lastWordMatch = textBefore.match(/(\w+)$/);
+
+            if (lastWordMatch) {
+                e.preventDefault();
+
+                const tagName = lastWordMatch[0];
+                const expandedTag = `<${tagName}></${tagName}>`;
+
+                // ⚠️ 2. [가장 중요] 단어 "p"를 먼저 지워줘야 해!
+                // 현재 커서 위치에서 단어 길이만큼 뒤로 범위를 넓혀서 선택하기
+                range.setStart(range.startContainer, range.startOffset - tagName.length);
+                range.deleteContents(); // 이제 "p"가 지워짐!
+
+                const newNode = document.createTextNode(expandedTag);
+                range.insertNode(newNode);
+
+                // 4. 커서를 태그 사이로 이동시키기
+                const newRange = document.createRange();
+                const cursorPosition = tagName.length + 2; 
+                
+                newRange.setStart(newNode, cursorPosition);
+                newRange.setEnd(newNode, cursorPosition);
+
+                // ⚠️ 3. 브라우저에게 "이 새로운 범위를 봐!"라고 알려줘야 해
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+            }
+        }
+    }
+
+    // JS 전용 기능 모음
+    function handleJSAssist(e) {
         if (state.popup) {
             if (e.key === 'ArrowDown') { e.preventDefault(); moveSelection(1); return; }
             if (e.key === 'ArrowUp') { e.preventDefault(); moveSelection(-1); return; }
@@ -56,78 +94,123 @@
             }
             if (e.key === 'Escape') { closePopup(); return; }
         }
-
-        // 1. 괄호가 입력되면 일단 팝업은 무조건 닫기
-        if (["(", "[", "{", "'", '"'].includes(e.key)) {
-            closePopup(); 
-
-            // 2. 괄호 자동 완성 로직
-            if (e.key === "(") {
-                e.preventDefault(); // 원래 써지려던 '(' 한 개를 취소해
-                document.execCommand('insertText', false, "()"); // 대신 "()" 두 개를 넣어
-                
-                // 3. 커서를 괄호 사이로 옮기기
-                const sel = window.getSelection();
-                const range = sel.getRangeAt(0);
-                range.setStart(range.startContainer, range.startOffset - 1); // 커서를 왼쪽으로 한 칸 이동
-                range.collapse(true); // 이동한 위치로 고정
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
-            if (e.key === "{") {
-                e.preventDefault(); // 원래 써지려던 '{' 한 개를 취소해
-                document.execCommand('insertText', false, "{}"); // 대신 "{}" 두 개를 넣어
-                
-                // 3. 커서를 괄호 사이로 옮기기
-                const sel = window.getSelection();
-                const range = sel.getRangeAt(0);
-                range.setStart(range.startContainer, range.startOffset - 1); // 커서를 왼쪽으로 한 칸 이동
-                range.collapse(true); // 이동한 위치로 고정
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
-            if (e.key === "[") {
-                e.preventDefault(); // 원래 써지려던 '[' 한 개를 취소해
-                document.execCommand('insertText', false, "[]"); // 대신 "[]" 두 개를 넣어
-                
-                // 3. 커서를 괄호 사이로 옮기기
-                const sel = window.getSelection();
-                const range = sel.getRangeAt(0);
-                range.setStart(range.startContainer, range.startOffset - 1); // 커서를 왼쪽으로 한 칸 이동
-                range.collapse(true); // 이동한 위치로 고정
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
-            if (e.key === "'") {
-                e.preventDefault(); // 원래 써지려던 ` ' ` 한 개를 취소해
-                document.execCommand('insertText', false, "''"); // 대신 "''" 두 개를 넣어
-                
-                // 3. 커서를 괄호 사이로 옮기기
-                const sel = window.getSelection();
-                const range = sel.getRangeAt(0);
-                range.setStart(range.startContainer, range.startOffset - 1); // 커서를 왼쪽으로 한 칸 이동
-                range.collapse(true); // 이동한 위치로 고정
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
-            if (e.key === '"') {
-                e.preventDefault(); // 원래 써지려던 ` " ` 한 개를 취소해
-                document.execCommand('insertText', false, '""'); // 대신 '""' 두 개를 넣어
-                
-                // 3. 커서를 괄호 사이로 옮기기
-                const sel = window.getSelection();
-                const range = sel.getRangeAt(0);
-                range.setStart(range.startContainer, range.startOffset - 1); // 커서를 왼쪽으로 한 칸 이동
-                range.collapse(true); // 이동한 위치로 고정
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
-        }
+        
         // 키 입력 후 즉시 트리거 (딜레이 최소화)
         setTimeout(triggerSuggest, 0);
     }
 
+    // CSS 전용 기능 모음
+    function handleCSSAssist(e) {
+        if (e.key === ':') {
+            e.preventDefault(); // 기본 ':' 입력을 막고
+
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+
+            // ': ;'를 한꺼번에 넣기
+            const newNode = document.createTextNode(': ;');
+            range.deleteContents();
+            range.insertNode(newNode);
+
+            // 커서를 ':' 와 ';' 사이로 옮기기
+            const newRange = document.createRange();
+            newRange.setStart(newNode, 2); 
+            newRange.setEnd(newNode, 2);
+
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+        }
+    }
+
+    // 괄호 자동완성 기능 분리
+    function handleBrackets(e) {
+        const brackets = {
+            '(': ')',
+            '[': ']',
+            '{': '}',
+            '"': '"',
+            "'": "'"
+        };
+
+        const closeBracket = brackets[e.key];
+        if (!closeBracket) return; // 괄호가 아니면 그냥 종료
+
+        e.preventDefault(); // 기본 입력 막기 (우리가 직접 제어할 거니까!)
+
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        
+        // 1. 여는 괄호와 닫는 괄호를 합친 텍스트 노드 만들기
+        const text = e.key + closeBracket;
+        const newNode = document.createTextNode(text);
+
+        // 2. 현재 커서 위치에 노드 넣기
+        range.deleteContents();
+        range.insertNode(newNode);
+
+        // 3. 커서를 괄호 사이로 옮기기 (Selection API의 마법!)
+        const newRange = document.createRange();
+        newRange.setStart(newNode, 1); // 괄호 사이(index 1)에 커서 두기
+        newRange.setEnd(newNode, 1);
+        
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+    }
+
+    // 현재 파일의 언어를 확인하는 함수
+    function getEditorLanguage() {
+        // 1. 네가 찾은 클래스명으로 요소 찾기
+        const fileInputElement = document.querySelector('.prc-components-Input-IwWrt'); 
+        
+        // 2. 요소가 있고 value가 있는지 확인
+        if (fileInputElement && fileInputElement.value) {
+            const fileName = fileInputElement.value.toLowerCase();
+
+            if (fileName.endsWith('.html')) return 'html';
+            if (fileName.endsWith('.css')) return 'css';
+            if (fileName.endsWith('.js')) return 'javascript';
+        }
+
+        // 3. 만약 요소를 못 찾으면 URL 방식이라도 써서 백업!
+        const url = window.location.href.toLowerCase();
+        if (url.includes('.html')) return 'html';
+        if (url.includes('.css')) return 'css';
+        if (url.includes('.js')) return 'javascript';
+        
+        return 'unknown';
+    }
+
+    // 언어 별 전용 기능 구현
+    document.addEventListener('keydown', (e) => {
+        const lang = getEditorLanguage();
+
+        // 1. 공통 기능 (괄호)
+        const brackets = ['(', '[', '{', '"', "'"];
+        if (brackets.includes(e.key)) {
+            handleBrackets(e);
+            return; // 처리했으면 끝!
+        }
+
+        // 2. 언어별 분기 처리
+        if (lang === 'html') {
+            handleHTMLAutoClose(e); 
+        } else if (lang === 'javascript') {
+            // JS일 때만 팝업 관련 키보드 제어 (위/아래 화살표 등) 실행
+            handleJSAssist(e);
+        } else if (lang === 'css') {
+            handleCSSAssist(e)
+        }
+    }, true); // true를 넣으면 이벤트 우선순위가 높아져!
+
     function triggerSuggest() {
+        const lang = getEditorLanguage();
+        if (lang !== 'javascript') { // JS가 아니면 팝업을 띄우지 마!
+            closePopup();
+            return;
+        }
+        
         const sel = window.getSelection();
         if (!sel.rangeCount) return;
         
