@@ -18,22 +18,8 @@
 
 ## 👨‍💻 사용 방법
 
-1. 콘솔창에
-
-``` js
-fetch('https://raw.githubusercontent.com/junnyontop-pixel/VisualGitCode_Lite/main/github_editor_plus/content.js')
-  .then(res => res.text())
-  .then(code => {
-    const script = document.createElement('script');
-    script.textContent = code;
-    document.head.appendChild(script);
-    console.log('VisualGitCode_Lite 로드 완료! ✨');
-  })
-  .catch(err => console.error('이런:', err));
-```
-입력
-
-> 현재 깃허브의 엄격한 보안 정책으로 1번 방법은 작동이 되지 않습니다. 양해부탁드립니다.
+1. `https://raw.githubusercontent.com/junnyontop-pixel/VisualGitCode_Lite/main/github_editor_plus/content.js`에 접속후
+  전체 코드 복사, 콘솔창에 붙여넣고 사용가능
 
 2. 이 레포지토리에서 다운로드 후 `chrome://extensions`로 이동, **개발자 모드를 켜고** `압축해제한 확장프로그램 로드`클릭 
 
