@@ -59,9 +59,9 @@ fetch('https://raw.githubusercontent.com/junnyontop-pixel/VisualGitCode_Lite/mai
 
 ## 📈 앞으로의 계획 (Roadmap)
 
-- [ ] HTML 태그 자동 완성 및 닫는 태그 자동 생성
+- [x] HTML 태그 자동 완성 및 닫는 태그 자동 생성
 - [x] 스마트 괄호 자동 완성 (`()`, `{}`, `[]`) 및 커서 중앙 배치
-- [ ] 파일 확장자별 맞춤형 키워드 제공 (JS, HTML, CSS 분리)
+- [x] 파일 확장자별 맞춤형 키워드 제공 (JS, HTML, CSS 분리)
 - [ ] 에디터 줄 이동 및 고급 단축키 추가
 
 ---
