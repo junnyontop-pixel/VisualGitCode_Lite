@@ -56,6 +56,73 @@
             }
             if (e.key === 'Escape') { closePopup(); return; }
         }
+
+        // 1. 괄호가 입력되면 일단 팝업은 무조건 닫기
+        if (["(", "[", "{", "'", '"'].includes(e.key)) {
+            closePopup(); 
+
+            // 2. 괄호 자동 완성 로직
+            if (e.key === "(") {
+                e.preventDefault(); // 원래 써지려던 '(' 한 개를 취소해
+                document.execCommand('insertText', false, "()"); // 대신 "()" 두 개를 넣어
+                
+                // 3. 커서를 괄호 사이로 옮기기
+                const sel = window.getSelection();
+                const range = sel.getRangeAt(0);
+                range.setStart(range.startContainer, range.startOffset - 1); // 커서를 왼쪽으로 한 칸 이동
+                range.collapse(true); // 이동한 위치로 고정
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+            if (e.key === "{") {
+                e.preventDefault(); // 원래 써지려던 '{' 한 개를 취소해
+                document.execCommand('insertText', false, "{}"); // 대신 "{}" 두 개를 넣어
+                
+                // 3. 커서를 괄호 사이로 옮기기
+                const sel = window.getSelection();
+                const range = sel.getRangeAt(0);
+                range.setStart(range.startContainer, range.startOffset - 1); // 커서를 왼쪽으로 한 칸 이동
+                range.collapse(true); // 이동한 위치로 고정
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+            if (e.key === "[") {
+                e.preventDefault(); // 원래 써지려던 '[' 한 개를 취소해
+                document.execCommand('insertText', false, "[]"); // 대신 "[]" 두 개를 넣어
+                
+                // 3. 커서를 괄호 사이로 옮기기
+                const sel = window.getSelection();
+                const range = sel.getRangeAt(0);
+                range.setStart(range.startContainer, range.startOffset - 1); // 커서를 왼쪽으로 한 칸 이동
+                range.collapse(true); // 이동한 위치로 고정
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+            if (e.key === "'") {
+                e.preventDefault(); // 원래 써지려던 ` ' ` 한 개를 취소해
+                document.execCommand('insertText', false, "''"); // 대신 "''" 두 개를 넣어
+                
+                // 3. 커서를 괄호 사이로 옮기기
+                const sel = window.getSelection();
+                const range = sel.getRangeAt(0);
+                range.setStart(range.startContainer, range.startOffset - 1); // 커서를 왼쪽으로 한 칸 이동
+                range.collapse(true); // 이동한 위치로 고정
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+            if (e.key === '"') {
+                e.preventDefault(); // 원래 써지려던 ` " ` 한 개를 취소해
+                document.execCommand('insertText', false, '""'); // 대신 '""' 두 개를 넣어
+                
+                // 3. 커서를 괄호 사이로 옮기기
+                const sel = window.getSelection();
+                const range = sel.getRangeAt(0);
+                range.setStart(range.startContainer, range.startOffset - 1); // 커서를 왼쪽으로 한 칸 이동
+                range.collapse(true); // 이동한 위치로 고정
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
         // 키 입력 후 즉시 트리거 (딜레이 최소화)
         setTimeout(triggerSuggest, 0);
     }
