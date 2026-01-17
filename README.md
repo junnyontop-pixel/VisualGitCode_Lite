@@ -33,6 +33,8 @@ fetch('https://raw.githubusercontent.com/junnyontop-pixel/VisualGitCode_Lite/mai
 ```
 입력
 
+> 현재 깃허브의 엄격한 보안 정책으로 1번 방법은 작동이 되지 않습니다. 양해부탁드립니다.
+
 2. 이 레포지토리에서 다운로드 후 `chrome://extensions`로 이동, **개발자 모드를 켜고** `압축해제한 확장프로그램 로드`클릭 
 
 ---
