@@ -21,14 +21,15 @@
 1. 콘솔창에
 
 ``` js
-fetch('https://cdn.jsdelivr.net/gh/junnyontop-pixel/VisualGitCode_Lite@main/VisualGitCode_Lite.js')
+fetch('https://raw.githubusercontent.com/junnyontop-pixel/VisualGitCode_Lite/main/github_editor_plus/content.js')
   .then(res => res.text())
   .then(code => {
     const script = document.createElement('script');
     script.textContent = code;
     document.head.appendChild(script);
     console.log('VisualGitCode_Lite 로드 완료! ✨');
-  });
+  })
+  .catch(err => console.error('이런:', err));
 ```
 입력
 
